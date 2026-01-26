@@ -12,6 +12,13 @@ A simple, user-friendly inventory management application built with Python and T
 -   **Valuation**: Real-time calculation of total inventory value.
 -   **Data Persistence**: Uses SQLite database (`inventory.db`) to save data.
 
+## Python Compatibility
+
+This application is compatible with modern versions of Python.
+
+- **Supported Python Versions**: Python 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12 and later.
+- **Incompatible Python Versions**: Python 2.x and Python versions earlier than 3.6 are **not supported**.
+
 ## Technologies Used
 
 -   **Python**: Core programming language.
