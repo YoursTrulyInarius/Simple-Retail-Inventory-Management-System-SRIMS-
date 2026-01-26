@@ -1,6 +1,6 @@
 # Simple Retail Inventory Management System
 
-A simple, user-friendly inventory management application built with Python and Tkinter. This application allows users to manage product stock, track sales, and monitor inventory value.
+A simple, user-friendly inventory management application built with Python and Tkinter, featuring a modern Bootstrap-inspired interface. This application allows users to manage product stock, track sales, and monitor inventory value.
 
 ## Features
 
@@ -23,18 +23,24 @@ This application is compatible with modern versions of Python.
 
 -   **Python**: Core programming language.
 -   **Tkinter**: Standard GUI framework for Python.
+-   **ttkbootstrap**: Modern themed widget extension for Tkinter (provides the Bootstrap aesthetic).
 -   **SQLite**: Lightweight disk-based database.
 
 ## Installation and Usage
 
-1.  **Prerequisites**: Ensure you have Python installed on your system.
+1.  **Prerequisites**: Ensure you have Python (version 3.6 or later) installed on your system.
 2.  **Clone/Download**: Download the source code to your local machine.
-3.  **Run the Application**:
+3.  **Install Dependencies**:
     Open a terminal or command prompt in the project directory and run:
+    ```bash
+    pip install ttkbootstrap
+    ```
+4.  **Run the Application**:
+    In the same terminal, run:
     ```bash
     python main.py
     ```
-4.  **Database**: The `inventory.db` file will be created automatically upon the first run.
+5.  **Database**: The `inventory.db` file will be created automatically upon the first run.
 
 ## Author
 
