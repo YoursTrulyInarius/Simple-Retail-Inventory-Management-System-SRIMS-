@@ -10,7 +10,11 @@ class InventoryApp:
         self.db = Database()
         self.root = root
         self.root.title("Simple Retail Inventory Management System")
-        self.root.geometry("1300x850")
+        self.root.geometry("1100x700")
+        try:
+            self.root.state('zoomed')
+        except:
+            pass # Linux/Mac might not support 'zoomed'
 
         # Variables
         self.name_var = tk.StringVar()
@@ -23,6 +27,20 @@ class InventoryApp:
         self.setup_ui()
         self.populate_list()
 
+    def validate_numeric(self, p):
+        if p == "" or p.isdigit():
+            return True
+        return False
+
+    def validate_float(self, p):
+        if p == "":
+            return True
+        try:
+            float(p)
+            return True
+        except ValueError:
+            return False
+
     def setup_ui(self):
         # Top Header
         header_frame = tb.Frame(self.root, bootstyle=PRIMARY)
@@ -30,6 +48,17 @@ class InventoryApp:
         
         tb.Label(header_frame, text="Simple Retail Inventory Management System", 
                  font=("Helvetica", 26, "bold"), bootstyle=INVERSE).pack(pady=25)
+
+        # Footer Status Bar (Packed BEFORE container to ensure visibility)
+        footer = tb.Frame(self.root, bootstyle=LIGHT, padding=15)
+        footer.pack(fill=X, side=BOTTOM)
+
+        self.valuation_label = tb.Label(footer, text="Total Inventory Value: ₱0.00", font=("Helvetica", 14, "bold"), bootstyle=DARK)
+        self.valuation_label.pack(side=RIGHT, padx=25)
+
+        self.alert_label = tb.Label(footer, text="", font=("Helvetica", 14, "bold"), bootstyle=DANGER)
+        self.alert_label.pack(side=LEFT, padx=25)
+        self.alert_label.bind("<Button-1>", self.show_low_stock_popup)
 
         # Main Container
         container = tb.Frame(self.root, padding=25)
@@ -60,6 +89,10 @@ class InventoryApp:
         style.configure('TButton', font=BTN_FONT)
         
         grid_config = {"padx": 10, "pady": 15, "sticky": W}
+
+        # Register validation commands
+        vcmd_num = (self.root.register(self.validate_numeric), '%P')
+        vcmd_float = (self.root.register(self.validate_float), '%P')
         
         tb.Label(input_inner, text="Product Name:", font=LABEL_FONT).grid(row=0, column=0, **grid_config)
         tb.Entry(input_inner, textvariable=self.name_var, width=35).grid(row=0, column=1, sticky=EW, padx=5)
@@ -69,10 +102,10 @@ class InventoryApp:
         tb.Combobox(input_inner, textvariable=self.category_var, values=categories, width=33).grid(row=1, column=1, sticky=EW, padx=5)
 
         tb.Label(input_inner, text="Quantity:", font=LABEL_FONT).grid(row=2, column=0, **grid_config)
-        tb.Entry(input_inner, textvariable=self.quantity_var, width=35).grid(row=2, column=1, sticky=EW, padx=5)
+        tb.Entry(input_inner, textvariable=self.quantity_var, width=35, validate="key", validatecommand=vcmd_num).grid(row=2, column=1, sticky=EW, padx=5)
 
         tb.Label(input_inner, text="Price:", font=LABEL_FONT).grid(row=3, column=0, **grid_config)
-        tb.Entry(input_inner, textvariable=self.price_var, width=35).grid(row=3, column=1, sticky=EW, padx=5)
+        tb.Entry(input_inner, textvariable=self.price_var, width=35, validate="key", validatecommand=vcmd_float).grid(row=3, column=1, sticky=EW, padx=5)
 
         tb.Label(input_inner, text="Description:", font=LABEL_FONT).grid(row=4, column=0, **grid_config)
         tb.Entry(input_inner, textvariable=self.description_var, width=35).grid(row=4, column=1, sticky=EW, padx=5)
@@ -131,17 +164,6 @@ class InventoryApp:
         style.configure('Treeview.Heading', font=("Helvetica", 13, "bold"), borderwidth=1)
         
         self.tree.bind("<<TreeviewSelect>>", self.select_item)
-
-        # Footer Status Bar
-        footer = tb.Frame(self.root, bootstyle=LIGHT, padding=15)
-        footer.pack(fill=X, side=BOTTOM)
-
-        self.valuation_label = tb.Label(footer, text="Total Inventory Value: ₱0.00", font=("Helvetica", 14, "bold"), bootstyle=DARK)
-        self.valuation_label.pack(side=RIGHT, padx=25)
-
-        self.alert_label = tb.Label(footer, text="", font=("Helvetica", 14, "bold"), bootstyle=DANGER)
-        self.alert_label.pack(side=LEFT, padx=25)
-        self.alert_label.bind("<Button-1>", self.show_low_stock_popup)
 
     def populate_list(self):
         # We need to bypass Tableview's automatic mapping to keep ID as iid
@@ -232,15 +254,33 @@ class InventoryApp:
             messagebox.showerror("Error", str(e))
 
     def validate_inputs(self):
+        # Enforce all fields must be filled
         if not self.name_var.get().strip():
-            messagebox.showwarning("Validation", "Product Name is required")
+            messagebox.showwarning("Validation Error", "Product Name is required!")
             return False
+        
+        if not self.category_var.get().strip():
+            messagebox.showwarning("Validation Error", "Please select or enter a Category!")
+            return False
+            
+        if not self.description_var.get().strip():
+            messagebox.showwarning("Validation Error", "Description is required!")
+            return False
+
         try:
-            if self.quantity_var.get() < 0 or self.price_var.get() < 0:
-                raise ValueError
+            qty = self.quantity_var.get()
+            price = self.price_var.get()
+            
+            if qty < 0:
+                messagebox.showwarning("Validation Error", "Quantity cannot be negative!")
+                return False
+            if price <= 0:
+                messagebox.showwarning("Validation Error", "Price must be greater than zero!")
+                return False
         except (tk.TclError, ValueError):
-            messagebox.showwarning("Validation", "Quantity and Price must be positive numbers")
+            messagebox.showwarning("Validation Error", "Quantity and Price must be valid numbers!")
             return False
+            
         return True
 
     def search_inventory(self):
