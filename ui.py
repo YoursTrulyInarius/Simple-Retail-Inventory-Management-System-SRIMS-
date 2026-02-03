@@ -178,9 +178,12 @@ class InventoryApp:
 
     def select_item(self, event):
         try:
-            selected_item = self.tree.selection()[0]
-            # Use iid for the ID
-            self.selected_id = selected_item
+            selection = self.tree.selection()
+            if not selection:
+                return
+            selected_item = selection[0]
+            # Use iid for the ID, and ensure it's an integer
+            self.selected_id = int(selected_item)
             row = self.tree.item(selected_item)['values']
             self.name_var.set(row[0])
             self.category_var.set(row[1])
@@ -197,11 +200,19 @@ class InventoryApp:
     def add_item(self):
         if not self.validate_inputs():
             return
+        
+        # If an item was selected, deselect it before adding as a new item
+        if hasattr(self, 'selected_id'):
+            del self.selected_id
+            self.tree.selection_remove(self.tree.selection())
+
         try:
-            self.db.insert_product(self.name_var.get(), self.category_var.get(), self.quantity_var.get(), self.price_var.get(), self.description_var.get())
+            self.db.insert_product(self.name_var.get().strip(), self.category_var.get(), self.quantity_var.get(), self.price_var.get(), self.description_var.get().strip())
             self.clear_inputs()
             self.populate_list()
             messagebox.showinfo("Success", "Product added successfully")
+        except ValueError as e:
+            messagebox.showwarning("Warning", str(e))
         except Exception as e:
             messagebox.showerror("Error", f"Could not add product: {str(e)}")
 
@@ -212,10 +223,12 @@ class InventoryApp:
         if not self.validate_inputs():
             return
         try:
-            self.db.update_product(self.selected_id, self.name_var.get(), self.category_var.get(), self.quantity_var.get(), self.price_var.get(), self.description_var.get())
+            self.db.update_product(self.selected_id, self.name_var.get().strip(), self.category_var.get(), self.quantity_var.get(), self.price_var.get(), self.description_var.get().strip())
             self.clear_inputs()
             self.populate_list()
             messagebox.showinfo("Success", "Product updated successfully")
+        except ValueError as e:
+            messagebox.showwarning("Warning", str(e))
         except Exception as e:
             messagebox.showerror("Error", f"Could not update product: {str(e)}")
 

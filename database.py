@@ -11,7 +11,7 @@ class Database:
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS products (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
+                name TEXT NOT NULL UNIQUE,
                 category TEXT,
                 quantity INTEGER DEFAULT 0,
                 price REAL DEFAULT 0.0,
@@ -21,9 +21,12 @@ class Database:
         self.conn.commit()
 
     def insert_product(self, name, category, quantity, price, description):
-        self.cursor.execute("INSERT INTO products (name, category, quantity, price, description) VALUES (?, ?, ?, ?, ?)",
-                            (name, category, quantity, price, description))
-        self.conn.commit()
+        try:
+            self.cursor.execute("INSERT INTO products (name, category, quantity, price, description) VALUES (?, ?, ?, ?, ?)",
+                                (name, category, quantity, price, description))
+            self.conn.commit()
+        except sqlite3.IntegrityError:
+            raise ValueError(f"A product with the name '{name}' already exists.")
 
     def fetch_all_products(self):
         self.cursor.execute("SELECT * FROM products")
@@ -31,12 +34,19 @@ class Database:
         return [Product(*row) for row in rows]
 
     def update_product(self, id, name, category, quantity, price, description):
-        self.cursor.execute("UPDATE products SET name=?, category=?, quantity=?, price=?, description=? WHERE id=?",
-                            (name, category, quantity, price, description, id))
-        self.conn.commit()
+        try:
+            self.cursor.execute("UPDATE products SET name=?, category=?, quantity=?, price=?, description=? WHERE id=?",
+                                (name, category, quantity, price, description, id))
+            if self.cursor.rowcount == 0:
+                raise ValueError(f"Product with ID {id} not found.")
+            self.conn.commit()
+        except sqlite3.IntegrityError:
+            raise ValueError(f"A product with the name '{name}' already exists.")
 
     def delete_product(self, id):
         self.cursor.execute("DELETE FROM products WHERE id=?", (id,))
+        if self.cursor.rowcount == 0:
+            raise ValueError(f"Product with ID {id} not found.")
         self.conn.commit()
 
     def search_products(self, query):
