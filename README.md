@@ -47,4 +47,3 @@ This application is compatible with modern versions of Python.
 ## Author
 
 Created by **Sonjeev Cabardo**
-Progress: 100%
