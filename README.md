@@ -44,5 +44,3 @@ This application is compatible with modern versions of Python.
 
 6.  **STATUS**: 98%
 
-## Author
-
