@@ -42,5 +42,4 @@ This application is compatible with modern versions of Python.
     ```
 5.  **Database**: The `inventory.db` file will be created automatically upon the first run.
 
-6.  **STATUS**: 98%
 
